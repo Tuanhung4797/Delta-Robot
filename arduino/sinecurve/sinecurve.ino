@@ -10,11 +10,11 @@
 // constants
 //------------------------------------------------------------------------------
 // Change this to your board type.
-#define BOARD_UNO 1
-//#define BOARD_MEGA 1
+//#define BOARD_UNO 1
+#define BOARD_MEGA 1
 
-const int MAX_ANGLE    = 90+35;
-const int MIN_ANGLE    = 90-80;
+const int MAX_ANGLE    = 90+75;
+const int MIN_ANGLE    = 90-40;
 const int MIDDLE_ANGLE = (MAX_ANGLE+MIN_ANGLE)/2;
 const int HALF_RANGE   = (MAX_ANGLE-MIN_ANGLE)/2;
 const int NUM_ARMS     = 3;
@@ -26,7 +26,7 @@ const long BAUD        = 57600;
 static const int pins[] = {9,6,5,3};
 #endif
 #ifdef BOARD_MEGA
-static const int pins[] = {5,4,3,2};
+static const int pins[] = {7,6,5,4};
 #endif
 
 
@@ -107,7 +107,7 @@ void setup() {
     // center the arm
     moveArm(i,90);
   }
-  
+ //while(1); 
   // I use this delay to unplug after the servos are centered.
   // Makes installing the biceps easier.
   Serial.print(F("5..."));

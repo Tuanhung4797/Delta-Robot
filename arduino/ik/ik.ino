@@ -20,8 +20,8 @@
 // constants
 //------------------------------------------------------------------------------
 // Change this to your board type.
-#define BOARD_UNO
-//#define BOARD_MEGA
+//#define BOARD_UNO
+#define BOARD_MEGA
 
 // Serial communication bitrate
 const long BAUD        = 57600;
@@ -34,25 +34,25 @@ const int MAX_BUF      = 64;
 #define DELAY            (5)
 
 // how far should we subdivide arcs into line segments?
-#define CM_PER_SEGMENT   (0.50)
+#define CM_PER_SEGMENT   (0.5)
 #define MIN_FEED_RATE    (0.01)  // cm/s
 
-static const float shoulder_to_elbow  = 5;  // cm
-static const float elbow_to_wrist     = 18.5f;  // cm
+static const float shoulder_to_elbow  = 9.5f;  // cm        
+static const float elbow_to_wrist     = 21.0f;  // cm
 
 #if NUM_ARMS == 4
 static const float center_to_shoulder = 5.0f;  // cm
 static const float effector_to_wrist  = 1.59258f+0.635f;  // cm
 #else
-static const float center_to_shoulder = 5.753f;  // cm
-static const float effector_to_wrist  = 1.59258f;  // cm
+static const float center_to_shoulder = 7.0f;  // cm
+static const float effector_to_wrist  = 4.8f;  // cm
 #endif
 
 #ifdef BOARD_UNO
 static const int pins[] = {9,6,5,3};
 #endif
 #ifdef BOARD_MEGA
-static const int pins[] = {5,4,3,2};
+static const int pins[] = {7,6,5,4};
 #endif
 
 
@@ -144,12 +144,14 @@ char outOfBounds(float x,float y,float z) {
   int error=0,i;
   Vector3 w, test(x,y,z);
   float len;
+  Serial.println("Test bound");
+
   for(i=0;i<NUM_ARMS;++i) {
     Arm &arm=robot.arms[i];
     // get wrist position
     w = test + arm.wrist.relative - arm.shoulder.pos;
     len=w.Length() - elbow_to_wrist;
-
+ Serial.print(w.Length()); Serial.print(" ");   Serial.print(len); Serial.print(" ");
     if(fabs(len) > shoulder_to_elbow) return 1;
   }
   return 0;
@@ -332,13 +334,21 @@ void line(float x, float y, float z) {
  */
 static void line_safe(float x,float y,float z) {
   // split up long lines to make them straighter?
+ Serial.print(x);Serial.print(" ");  Serial.print(y);Serial.print(" ");  Serial.println(z);
+
+
   float dx=x-robot.ee.pos.x;
   float dy=y-robot.ee.pos.y;
+ // float dz=z-robot.ee.pos.z;
+ Serial.print(dx);Serial.print(" ");  Serial.print(dy);Serial.print(" ");  //Serial.println(dz);
 
-  float len=sqrt(dx*dx+dy*dy);
-  
+//  float len=sqrt(dx*dx+dy*dy+dz*dz);
+ float len=sqrt(dx*dx+dy*dy);
+  Serial.print("LEN = "); Serial.println(len);
+  Serial.print("CM_PER_SEG "); Serial.println(CM_PER_SEGMENT);
   if(len<=CM_PER_SEGMENT) {
     line(x,y,z);
+    Serial.println("len<CM_PER_SEG");
     return;
   }
   
@@ -493,6 +503,7 @@ void processCommand() {
       case 'F': ff=atof(ptr+1);  Serial.print('f'); Serial.println(ff); break;
       default: ptr=0; break;
       }
+      
     }
     
     if(feed_rate < MIN_FEED_RATE) feed_rate=MIN_FEED_RATE;
@@ -573,7 +584,8 @@ void setup() {
 
   setup_robot();
   // @TODO: Is this necessary?
-  //line(0,0,0);
+ // line(0,0,0);
+  //line(2,0,0);
   
   help();
   
